@@ -1,96 +1,96 @@
 "use server";
 
-import { default as prisma } from "./database"
+import { connectToDB } from "@/app/lib/database/database"
+import { User } from "@/app/lib/database/model"
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { signIn } from "@/auth";
 import bcrypt from "bcrypt";
 
 export const addUser = async (formData) => {
-    const { username, email, password, isAdmin, isActive, image } =
-        Object.fromEntries(formData);
+  const { username, email, password, phone, isAdmin, isActive } =
+    Object.fromEntries(formData);
 
-    try {
-        const hashedPassword = await bcrypt.hash(password, 8);
+  try {
+    connectToDB();
 
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-        const user = await prisma.user.create({
-            data: {
-                name: username,
-                email,
-                password: hashedPassword,
-                isAdmin: isAdmin === "yes" ? true : false,
-                image: image,
-                roles: {
-                    connectOrCreate: {
-                        where: {
-                            grup: "ADM"
-                        },
-                        create: {
-                            grup: "ADM",
-                            operacional: "WRITE",
-                            blipExtension: "WRITE",
-                            blog: "WRITE"
-                        }
-                    }
-                }
-            }
-        })
-    } catch (err) {
-        console.log(err);
-        throw new Error("Failed to create user!");
-    }
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword,
+      phone,
+      isAdmin,
+      isActive,
+    });
 
-    revalidatePath("/dashboard/users");
-    redirect("/dashboard/users");
+    await newUser.save();
+  } catch (err) {
+    console.log(err);
+    throw new Error("Failed to create user!");
+  }
+
+  revalidatePath("/dashboard/users");
+  redirect("/dashboard/users");
 };
 
 export const updateUser = async (formData) => {
-    const { id, name, email, password, image, isAdmin, isActive } =
-        Object.fromEntries(formData);
+  const { id, username, email, password, phone, isAdmin, isActive } =
+    Object.fromEntries(formData);
 
-    try {
-        const updateFields = {
-            name,
-            email,
-            password,
-            isAdmin,
-            isActive,
-            image,
-        };
+  try {
+    connectToDB();
 
-        Object.keys(updateFields).forEach(
-            (key) =>
-                (updateFields[key] === "" || undefined) && delete updateFields[key]
-        );
+    const updateFields = {
+      username,
+      email,
+      password,
+      phone,
+      isAdmin,
+      isActive,
+    };
 
-        await prisma.user.update({
-            where: {
-                id: parseInt(id),
-            },
-            data: {
-                ...updateFields,
-            },
-        });
-    } catch (err) {
-        console.log(err);
-        throw new Error("Failed to update user!");
-    }
+    Object.keys(updateFields).forEach(
+      (key) =>
+        (updateFields[key] === "" || undefined) && delete updateFields[key]
+    );
 
-    revalidatePath("/dashboard/users");
-    redirect("/dashboard/users");
+    await User.findByIdAndUpdate(id, updateFields);
+  } catch (err) {
+    console.log(err);
+    throw new Error("Failed to update user!");
+  }
+
+  revalidatePath("/dashboard/users");
+  redirect("/dashboard/users");
+};
+
+export const deleteUser = async (formData) => {
+  const { id } = Object.fromEntries(formData);
+
+  try {
+    connectToDB();
+    await User.findByIdAndDelete(id);
+  } catch (err) {
+    console.log(err);
+    throw new Error("Failed to delete user!");
+  }
+
+  revalidatePath("/dashboard/users");
 };
 
 export async function authenticate(
-    prevState,
-    formData
+  prevState,
+  formData
 ) {
-    try {
-        await signIn('credentials', Object.fromEntries(formData));
-    } catch (error) {
-        if ((error).message.includes('CredentialsSignin')) {
-            return 'CredentialsSignin';
-        }
-        throw error;
+  try {
+    await signIn('credentials', Object.fromEntries(formData));
+  } catch (error) {
+    if ((error).message.includes('CredentialsSignin')) {
+      return 'CredentialsSignin';
     }
+    throw error;
+  }
 }

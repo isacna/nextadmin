@@ -1,26 +1,18 @@
-import { default as prisma } from "./database"
-
+import {connectToDB} from "./database/database";
+import { User } from "./database/model";
 
 export const fetchUsers = async (q, page) => {
     const regex = new RegExp(q, "i");
     const ITEM_PER_PAGE = 5;
 
     try {
-        const count = await prisma.user.count();
-        const users = await prisma.user.findMany({
-            skip: (page - 1) * ITEM_PER_PAGE,
-            take: ITEM_PER_PAGE,
-            where: {
-                OR: [
-                    { name: { contains: q } },
-                    { email: { contains: q } },
-                ],
-            },
-        });
-
-
-
+        connectToDB();
+        const count = await User.find({ email: { $regex: regex } }).count();
+        const users = await User.find({ email: { $regex: regex } })
+          .limit(ITEM_PER_PAGE)
+          .skip(ITEM_PER_PAGE * (page - 1));
         return { count, users };
+
     } catch (err) {
         console.log(err)
         throw new Error("Error fetching users");
@@ -28,24 +20,22 @@ export const fetchUsers = async (q, page) => {
 }
 
 export const fetchUser = async (id) => {
-    try {
-        const user = await prisma.user.findUnique({
-            where: {
-                id: id,
-            },
-        });
-
-        return user;
-    } catch (err) {
-        console.log(err)
-        throw new Error("Error fetching user");
-    }
+    console.log(id);
+  try {
+    connectToDB();
+    const user = await User.findById(id);
+    return user;
+  } catch (err) {
+    console.log(err);
+    throw new Error("Failed to fetch user!");
+  }
 }
 
 export const fetchCards = async () => {
     const arrayCards = []
     try {
-        const count = await prisma.user.count();
+      const count = await User.find().count();
+        // const count = await prisma.user.count();
 
         arrayCards.push({ 
             id: 1,

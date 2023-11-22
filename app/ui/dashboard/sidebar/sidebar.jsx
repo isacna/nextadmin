@@ -31,26 +31,6 @@ const menuItems = [
       },
     ],
   },
-  // {
-  //   title: "Analytics",
-  //   list: [
-  //     {
-  //       title: "Revenue",
-  //       path: "/dashboard/revenue",
-  //       icon: <MdWork />,
-  //     },
-  //     {
-  //       title: "Reports",
-  //       path: "/dashboard/reports",
-  //       icon: <MdAnalytics />,
-  //     },
-  //     {
-  //       title: "Teams",
-  //       path: "/dashboard/teams",
-  //       icon: <MdPeople />,
-  //     },
-  //   ],
-  // },
   {
     title: "User",
     list: [
@@ -68,7 +48,9 @@ const menuItems = [
   },
 ];
 
-const SideBar = () => {
+const SideBar = async () => {
+  const { user } = await auth();
+  console.log(">>>>",user)
   return (
     <div className={styles.container}>
       <div className={styles.user}>
@@ -80,7 +62,7 @@ const SideBar = () => {
           height="50"
         />
         <div className={styles.userDetail}>
-          <span className={styles.username}>Fulano de Tal</span>
+          <span className={styles.username}>{user.name}</span>
           <span className={styles.userTitle}>Administrador</span>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { fetchUsers } from "@/app/lib/data";
 
 import Image from "next/image";
 import Link from "next/link";
+import { deleteUser } from "@/app/lib/actions";
 
 const UsersPage = async ({ searchParams }) => {
     const q = searchParams?.q || "";
@@ -48,7 +49,7 @@ const UsersPage = async ({ searchParams }) => {
                 </div>
               </td>
               <td>{user.email}</td>
-              <td>{user.created_at?.toString().slice(4, 16)}</td>
+              <td>{user.createdAt?.toString().slice(4, 16)}</td>
               <td>{user.isAdmin ? "Admin" : "Client"}</td>
               <td>{user.isActive ? "active" : "passive"}</td>
               <td>
@@ -58,12 +59,12 @@ const UsersPage = async ({ searchParams }) => {
                       View
                     </button>
                   </Link>
-                  {/* <form action={deleteUser}>
+                  <form action={deleteUser}>
                     <input type="hidden" name="id" value={(user.id)} />
                     <button className={`${styles.button} ${styles.delete}`}>
                       Delete
                     </button>
-                  </form> */}
+                  </form>
                 </div>
               </td>
             </tr>

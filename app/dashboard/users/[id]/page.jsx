@@ -20,7 +20,7 @@ const SingleUserPage = async ({ params }) => {
         <form action={updateUser} className={styles.form}>
           <input type="hidden" name="id" value={user.id}/>
           <label>Username</label>
-          <input type="text" name="username" placeholder={user.name} />
+          <input type="text" name="username" placeholder={user.username} />
           <label>Email</label>
           <input type="email" name="email" placeholder={user.email} />
           <label>Password</label>

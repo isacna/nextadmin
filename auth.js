@@ -1,62 +1,60 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { authConfig } from "@/authconfig";
+import { connectToDB } from "@/app/lib/database/database";
+import { User } from "@/app/lib/database/model";
 import bcrypt from "bcrypt";
-import prisma from "@/app/lib/database";
 
 const login = async (credentials) => {
-    try {
-        
-        const user = await prisma.user.findUnique({ where: {email: credentials.username }});
+  try {
+    connectToDB();
+    const user = await User.findOne({ email: credentials.email });
 
-        if (!user || !user.isAdmin) throw new Error("Wrong credentials!");
+    if (!user || !user.isAdmin) throw new Error("Wrong credentials!");
 
-        const isPasswordCorrect = await bcrypt.compare(
-            credentials.password,
-            user.password
-        );
-        
-        if (!isPasswordCorrect) throw new Error("Wrong credentials!");
+    const isPasswordCorrect = await bcrypt.compare(
+      credentials.password,
+      user.password
+    );
 
-        return user;
-    } catch (err) {
-        console.log(err);
-        throw new Error("Failed to login!");
-    }
+    if (!isPasswordCorrect) throw new Error("Wrong credentials!");
+
+    return user;
+  } catch (err) {
+    console.log(err);
+    throw new Error("Failed to login!");
+  }
 };
 
 export const { signIn, signOut, auth } = NextAuth({
-    ...authConfig,
-    providers: [
-        CredentialsProvider({
-            async authorize(credentials) {
-                try {
-                    const user = await login(credentials);
-                    return user;
-                } catch (err) {
-                    return null;
-                }
-            },
-        }),
-        
-    ],
-    // ADD ADDITIONAL INFORMATION TO SESSION
-    callbacks: {
-        async jwt({ token, user }) {         
-            if (user) {
-                token.username = user.email;
-                token.img = user.image;
-            }
-
-            return token;
-        },
-        async session({ session, token }) {
-            console.log({token})
-            if (token) {
-                session.user.username = token.username;
-                session.user.img = token.img;
-            }
-            return session;
-        },
+  ...authConfig,
+  providers: [
+    CredentialsProvider({
+      async authorize(credentials) {
+        try {
+          const user = await login(credentials);
+          return user;
+        } catch (err) {
+          return null;
+        }
+      },
+    }),
+  ],
+  // ADD ADDITIONAL INFORMATION TO SESSION
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.username = user.username;
+        token.img = user.img;
+      }
+      return token;
     },
+    async session({ session, token }) {
+      if (token) {
+        session.user.username = token.username;
+        session.user.img = token.img;
+      }
+      return session;
+    },
+  },
 });
