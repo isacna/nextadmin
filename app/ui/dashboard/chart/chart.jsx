@@ -1,5 +1,5 @@
 "use client";
-import consultarRompimentos from "@/app/lib/common/nmt"
+
 import styles from "./chart.module.css";
 import {
   LineChart,
@@ -50,7 +50,6 @@ const data = [
 ];
 
 const Chart = () => {
-  const data = consultarRompimentos()
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>Weekly Recap</h2>

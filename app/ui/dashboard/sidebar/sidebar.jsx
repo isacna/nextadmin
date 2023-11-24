@@ -12,7 +12,8 @@ import {
   MdOutlineSettings,
   MdPeople,
   MdSupervisedUserCircle,
-  MdWork,
+  MdOutlineRoute ,
+
 } from "react-icons/md";
 
 const menuItems = [
@@ -28,6 +29,11 @@ const menuItems = [
         title: "Users",
         path: "/dashboard/users",
         icon: <MdSupervisedUserCircle />,
+      },
+      {
+        title: "Rupture",
+        path: "/dashboard/rupture",
+        icon: <MdOutlineRoute />,
       },
     ],
   },
@@ -50,7 +56,6 @@ const menuItems = [
 
 const SideBar = async () => {
   const { user } = await auth();
-  console.log(">>>>",user)
   return (
     <div className={styles.container}>
       <div className={styles.user}>

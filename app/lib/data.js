@@ -1,5 +1,6 @@
 import {connectToDB} from "./database/database";
 import { User } from "./database/model";
+import { dbRompimento } from "./database/rompimento";
 
 export const fetchUsers = async (q, page) => {
     const regex = new RegExp(q, "i");
@@ -34,18 +35,40 @@ export const fetchUser = async (id) => {
 export const fetchCards = async () => {
     const arrayCards = []
     try {
+      connectToDB();
       const count = await User.find().count();
-        // const count = await prisma.user.count();
 
         arrayCards.push({ 
             id: 1,
-            title: "Users", 
+            title: "Usuários Ativos", 
             number: count, 
             change: count,
+        })
+
+        const rompimentos = await dbRompimento.find({ data_abertura: { $gte: new Date('2023-11-22') }}).count();
+
+        arrayCards.push({ 
+            id: 2,
+            title: "Rompimentos", 
+            number: rompimentos, 
+            change: rompimentos,
         })
         return arrayCards ;
     } catch (err) {
         console.log(err)
         throw new Error("Error cards");
     }
+}
+
+export async function consultarRompimentos() {
+  try {
+      connectToDB();
+
+      const rompimentos = await dbRompimento.find({ data_abertura: { $gte: new Date('2023-11-22') }});
+      
+      return rompimentos;
+  } catch (err) {
+      console.log(err);
+      throw new Error("Failed to get rompimentos!");
+  }
 }
