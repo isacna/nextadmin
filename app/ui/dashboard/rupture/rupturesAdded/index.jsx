@@ -1,8 +1,20 @@
 "use client";
 
 import styles from "@/app/ui/dashboard/rupture/rupturesAdded/rupturesAdded.module.css";
+import Formulario from "@/app/ui/dashboard/rupture/rupturePrevision/index";
+import { useState } from "react";
 
 export default function RupturesAdded({ ruptures }) {
+    const [exibirFormulario, setExibirFormulario] = useState(false);
+
+  const abrirFormulario = () => {
+    setExibirFormulario(true);
+  };
+
+  const fecharFormulario = () => {
+    setExibirFormulario(false);
+  };
+
   return (
     <div className={styles.container}>
       {ruptures.map((rupture, index) => (
@@ -19,7 +31,13 @@ export default function RupturesAdded({ ruptures }) {
           </div>
         </div>
       ))}
-        {ruptures.length > 0 ? <button type="submit" className={styles.buttonSubmit}>Submit</button> : null}
+        {ruptures.length > 0 ? <button type="submit" className={styles.buttonSubmit} onClick={abrirFormulario}>Submit</button> : null}
+        {exibirFormulario && (
+          <Formulario
+            mostrarFormulario={exibirFormulario}
+            fecharFormulario={fecharFormulario}
+          />
+        )}
     </div>
   );
 }
