@@ -9,7 +9,8 @@ import OltList from "@/app/ui/dashboard/rupture/oltList";
 const RupturePage = async ({ searchParams }) => {
   const q = searchParams?.q || "";
   const page = searchParams?.page || 1;
-  const romps = await consultarRompimentos();
+  const {rompimentos,count} = await consultarRompimentos(q, page);
+  
   return (
     <div className={styles.container}>
       <div className={styles.top}>
@@ -29,7 +30,7 @@ const RupturePage = async ({ searchParams }) => {
           </tr>
         </thead>
         <tbody className={styles.tbody}>
-          {romps.map((item) => (
+          {rompimentos.map((item) => (
             <tr key={item.id}>
               <td>{item.id}</td>
               <td>
@@ -78,6 +79,7 @@ const RupturePage = async ({ searchParams }) => {
           ))}
         </tbody>
       </table>
+      <Pagination count={count} />
     </div>
   );
 };

@@ -3,8 +3,10 @@ import styles from "./rupture.module.css";
 import { consultarRompimentos } from "@/app/lib/data";
 import {format} from 'date-fns';
 
-const Rupture = async () => {
-  const romps = await consultarRompimentos();
+const Rupture = async ({ searchParams }) => {
+  const q = searchParams?.q || "";
+  const page = searchParams?.page || 1;
+  const {rompimentos, count} = await consultarRompimentos(q,page);
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>Rompimentos</h2>
@@ -19,7 +21,7 @@ const Rupture = async () => {
           </tr>
         </thead>
         <tbody>
-          {romps.map((item) => (
+          {rompimentos.map((item) => (
             <tr key={item.id}>
               <td>
                 <div className={styles.user}>

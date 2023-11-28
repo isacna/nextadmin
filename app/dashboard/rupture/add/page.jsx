@@ -1,6 +1,7 @@
 "use client";
 
 import styles from "@/app/ui/dashboard/rupture/page/addRupture/rupture.add.module.css";
+import RupturesAdded from "@/app/ui/dashboard/rupture/rupturesAdded";
 import { useState } from "react";
 
 const data = [
@@ -216,61 +217,104 @@ const ports = [
 ];
 
 const AddRupturePage = () => {
-  const [showFrameSlot, setShowFrameSlot] = useState("");
-  function handleClick(event) {
-    setShowFrameSlot(event.target.value);
-  }
+  const [showRuptures, setRuptures] = useState([]);
+  const [selectOltValue, setSelectOltValue] = useState("");
+  const [selectFrameValue, setSelectFrameValue] = useState("");
+  const [selectPortValue, setSelectPortValue] = useState("");
+
+  const handleSelectOltChange = (event) => {
+    setSelectOltValue(event.target.value);
+  };
+  const handleSelectFrameChange = (event) => {
+    setSelectFrameValue(event.target.value);
+  };
+  const handleSelectPortChange = (event) => {
+    setSelectPortValue(event.target.value);
+  };
+
+  const handleAddClick = () => {
+    const newRuptureKey = selectOltValue;
+    const newRuptureValue = `${selectFrameValue}/${selectPortValue}`;
+    
+    setRuptures(prevRuptures => {
+      const existingRuptureIndex = prevRuptures.findIndex(rupture => Object.keys(rupture)[0] === newRuptureKey);
+      if (existingRuptureIndex !== -1) {
+        // Se o objeto já existe, verifique se o novo valor já está no array
+        if (!prevRuptures[existingRuptureIndex][newRuptureKey].includes(newRuptureValue)) {
+          // Se o valor não está no array, adicione-o
+          const newRuptures = [...prevRuptures];
+          newRuptures[existingRuptureIndex][newRuptureKey].push(newRuptureValue);
+          return newRuptures;
+        }
+        else {
+          // Se o objeto já existe e o valor já está no array, retorne o estado anterior
+          const newRuptures = [...prevRuptures];
+          return newRuptures;
+        }
+      } else {
+        // Se o objeto não existe, adicione um novo objeto ao array
+        return [...prevRuptures, { [newRuptureKey]: [newRuptureValue] }];
+      }
+    });
+  };
 
   return (
     <>
-    <div className={styles.container}>
-      <form className={styles.form}>
-        <select
-          name="selecOlt"
-          id="selecOlt"
-          value={showFrameSlot}
-          onChange={handleClick}
-        >
-          <option value={false}>Selecione a OLT</option>
-          {data.map((olt) => (
-            <option value={Object.keys(olt)} key={Object.keys(olt)}>
-              {Object.keys(olt)}
-            </option>
-          ))}
-        </select>
-        {!showFrameSlot ? null : (
-          <select name="selectFrame" id="selectFrame">
-            <option value={false}>Selecione o F/S</option>
-            {data
-              .filter((items) => items[showFrameSlot])
-              .map((item) => {
-                return item[showFrameSlot].map((fs) => (
-                  <option value={fs} key={fs}>
-                    {fs}
-                  </option>
-                ));
-              })}
+      <div className={styles.container}>
+        <form className={styles.form}>
+          <select
+            name="selecOlt"
+            id="selecOlt"
+            value={selectOltValue}
+            onChange={handleSelectOltChange}
+          >
+            <option value={false}>Selecione a OLT</option>
+            {data.map((olt) => (
+              <option value={Object.keys(olt)} key={Object.keys(olt)}>
+                {Object.keys(olt)}
+              </option>
+            ))}
           </select>
-        )}
-        {!showFrameSlot ? null : (
-          <select name="selectPort" id="selectPort">
-            <option value={false}>Selecione a porta</option>
-            {ports.map((port) => (
+          {!selectOltValue ? null : (
+            <select
+              name="selectFrame"
+              id="selectFrame"
+              onChange={handleSelectFrameChange}
+            >
+              <option value={false}>Selecione o F/S</option>
+              {data
+                .filter((items) => items[selectOltValue])
+                .map((item) => {
+                  return item[selectOltValue].map((fs) => (
+                    <option value={fs} key={fs}>
+                      {fs}
+                    </option>
+                  ));
+                })}
+            </select>
+          )}
+          {!selectOltValue ? null : (
+            <select
+              name="selectPort"
+              id="selectPort"
+              onChange={handleSelectPortChange}
+            >
+              <option value={false}>Selecione a porta</option>
+              {ports.map((port) => (
                 <option value={port} key={port}>
-                    {port}
+                  {port}
                 </option>
-                )
-            )}
-          </select>
-        )}
-      </form>
-      <div className={styles.buttonAdd}>
-        <button className={styles.button}>Adicionar</button>
+              ))}
+            </select>
+          )}
+        </form>
+        <div className={styles.buttonAdd}>
+          <button className={styles.button} onClick={handleAddClick}>
+            Adicionar
+          </button>
+        </div>
       </div>
-    </div>
-    <div className={styles.container}>
-
-    </div>
+      <RupturesAdded ruptures={showRuptures}/>
     </>
   );
 };
